@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">FindHospital</string>
     <string name="title_activity_main">FindHospital</string>
+    <string name="txtNome">Nome</string>
+    <string name="txtEndereco">Endereço</string>
+    <string name="txtLatitude">Latitude</string>
+    <string name="txtLongitude">Longitude</string>
+    <string name="btnTracarRota">Traçar Rota</string>
 </resources>

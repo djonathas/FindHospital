@@ -1,18 +1,27 @@
 package com.example.catolica.findhospital;
 
+import android.*;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -20,6 +29,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -29,13 +39,24 @@ import java.util.List;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
+    private static final String TAG = "mapa";
     private GoogleMap mMap;
     private List<Local> locais = new ArrayList<>();
+    private Marker userMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+                callDialog("Você precisa dar permissão de acesso a sua localização", new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION});
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+            }
+        }
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -64,6 +85,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         for (Local local : locais) {
             addMarker(local);
         }
+
+        minhaPosicao();
 
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
             @Override
@@ -96,8 +119,18 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        LatLng palmas = new LatLng(-10.2196937, -48.3387116);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(palmas, 13));
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Log.i(TAG, "setOnInfoWindowClickListener");
+                Intent intent = new Intent(getApplicationContext(), DetalhesActivity.class);
+                intent.putExtra("nome", marker.getTitle());
+                intent.putExtra("endereco", marker.getSnippet());
+                intent.putExtra("latitude", String.valueOf(marker.getPosition().latitude));
+                intent.putExtra("longitude", String.valueOf(marker.getPosition().longitude));
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -112,7 +145,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
-
+        userMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
     }
 
     @Override
@@ -149,6 +182,88 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         markerOptions.snippet(local.endereco);
 
         mMap.addMarker(markerOptions);
-        mMap.setOnInfoWindowClickListener(this);
+    }
+
+    public void addUserMarker(Local local) {
+        LatLng point = new LatLng(local.latitude, local.longitude);
+
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(point);
+        markerOptions.title(local.nome);
+        markerOptions.snippet(local.endereco);
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_person_pin));
+
+        userMarker = mMap.addMarker(markerOptions);
+
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Log.i(TAG, "setOnInfoWindowClickListener");
+                Intent intent = new Intent(getApplicationContext(), DetalhesActivity.class);
+                intent.putExtra("nome", marker.getTitle());
+                intent.putExtra("endereco", marker.getSnippet());
+                intent.putExtra("latitude", String.valueOf(marker.getPosition().latitude));
+                intent.putExtra("longitude", String.valueOf(marker.getPosition().longitude));
+                intent.putExtra("hideTracarRota", "true");
+                startActivity(intent);
+            }
+        });
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(point, 15));
+        Log.i(TAG, "addUserMarker");
+    }
+
+    private void callDialog(String message, final String[] permissions) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Permissões necessárias");
+        builder.setMessage(message);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                ActivityCompat.requestPermissions(MainActivity.this, permissions, 0);
+            }
+        });
+        builder.setNegativeButton("Não", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(MainActivity.this, "A aplicação não funcionará corretamente sem as permissões solicitadas.", Toast.LENGTH_LONG).show();
+            }
+        });
+        builder.show();
+    }
+
+    private void minhaPosicao() {
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        Location ultimaLocalizacao;
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+                callDialog("Você precisa dar permissão de acesso a sua localização", new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION});
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+            }
+        }
+
+        if (isGPSEnabled) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 0, this);
+            ultimaLocalizacao = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            locationManager.removeUpdates(this);
+
+            addUserMarker(new Local("Você está aqui!", "", ultimaLocalizacao.getLatitude(), ultimaLocalizacao.getLongitude()));
+
+            Log.i(TAG, "GPS");
+        } else if (isNetworkEnabled) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, this);
+            ultimaLocalizacao = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            locationManager.removeUpdates(this);
+
+            addUserMarker(new Local("Você está aqui!", "", ultimaLocalizacao.getLatitude(), ultimaLocalizacao.getLongitude()));
+
+            Log.i(TAG, "Network");
+        } else {
+            Toast.makeText(MainActivity.this, "Seu GPS e sua rede estão desativos, favor ativá-los.", Toast.LENGTH_SHORT).show();
+        }
     }
 }
