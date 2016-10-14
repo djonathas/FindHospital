@@ -68,6 +68,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         locais.add(new Local("Hospital Oswaldo Cruz", "OC ACSU SO 40 - Centro, 77000-000", -10.208447, -48.3366885));
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        try {
+            Intent intentService = new Intent(getApplicationContext(), Servico.class);
+            startService(intentService);
+        } catch (Exception e) {
+            Log.e(TAG, "onStart: " + e.toString());
+        }
+    }
 
     /**
      * Manipulates the map once available.
