@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/txtNome"
-        android:id="@+id/textView"
+        android:id="@+id/txtNome"
         android:paddingTop="10dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/txtEndereco"
-        android:id="@+id/textView2"
+        android:id="@+id/txtEndereco"
         android:paddingTop="10dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
@@ -45,7 +45,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/txtLatitude"
-        android:id="@+id/textView3"
+        android:id="@+id/txtLatitude"
         android:paddingTop="10dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
@@ -60,7 +60,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/txtLongitude"
-        android:id="@+id/textView4"
+        android:id="@+id/txtLongitude"
         android:paddingTop="10dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 

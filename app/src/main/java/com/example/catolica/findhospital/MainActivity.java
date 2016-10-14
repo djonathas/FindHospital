@@ -180,6 +180,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         markerOptions.position(point);
         markerOptions.title(local.nome);
         markerOptions.snippet(local.endereco);
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_hospital_marker));
 
         mMap.addMarker(markerOptions);
     }
@@ -194,20 +195,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_person_pin));
 
         userMarker = mMap.addMarker(markerOptions);
-
-        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-            @Override
-            public void onInfoWindowClick(Marker marker) {
-                Log.i(TAG, "setOnInfoWindowClickListener");
-                Intent intent = new Intent(getApplicationContext(), DetalhesActivity.class);
-                intent.putExtra("nome", marker.getTitle());
-                intent.putExtra("endereco", marker.getSnippet());
-                intent.putExtra("latitude", String.valueOf(marker.getPosition().latitude));
-                intent.putExtra("longitude", String.valueOf(marker.getPosition().longitude));
-                intent.putExtra("hideTracarRota", "true");
-                startActivity(intent);
-            }
-        });
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(point, 15));
         Log.i(TAG, "addUserMarker");
@@ -249,7 +236,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         if (isGPSEnabled) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 0, this);
             ultimaLocalizacao = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            locationManager.removeUpdates(this);
 
             addUserMarker(new Local("Você está aqui!", "", ultimaLocalizacao.getLatitude(), ultimaLocalizacao.getLongitude()));
 
@@ -257,7 +243,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         } else if (isNetworkEnabled) {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, this);
             ultimaLocalizacao = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            locationManager.removeUpdates(this);
 
             addUserMarker(new Local("Você está aqui!", "", ultimaLocalizacao.getLatitude(), ultimaLocalizacao.getLongitude()));
 
