@@ -66,6 +66,7 @@ public class Servico extends Service {
             this.startID = startID;
         }
 
+        //envia notificação ao usuário
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         private void sendNotification(String title, String message) {
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext());
@@ -91,6 +92,7 @@ public class Servico extends Service {
         public void run() {
             while (ativo) {
                 try {
+                    //envia a notificação a cada 30 dias
                     Thread.sleep(AlarmManager.INTERVAL_DAY * 30);
                     sendNotification("FindHospital", "Está na hora de você visitar seu médico!");
                     Log.i(TAG, "Chamando a thread");

@@ -6,4 +6,5 @@
     <string name="txtLatitude">Latitude</string>
     <string name="txtLongitude">Longitude</string>
     <string name="btnTracarRota">Traçar Rota</string>
+    <string name="txtTelefone">Telefone</string>
 </resources>
