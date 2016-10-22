@@ -9,13 +9,14 @@ public class Local {
     public String nome;
     public String endereco;
     public String telefone;
+    public String imagem;
 
-    public Local(String nome, String endereco, String telefone, double latitude, double longitude) {
+    public Local(String nome, String endereco, String imagem, double latitude, double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.nome = nome;
         this.endereco = endereco;
-        this.telefone = telefone;
+        this.imagem = imagem;
     }
 
     public Local(String nome, double latitude, double longitude) {

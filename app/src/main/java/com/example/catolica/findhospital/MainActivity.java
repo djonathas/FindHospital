@@ -22,6 +22,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -32,6 +38,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,15 +71,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        //crianda array de locais (unidades de saude) que serão exibidos no mapa
-        locais.add(new Local("Unidade de Pronto Atendimento Norte - UPA Norte", "Q. 203 Norte Alameda Central - Plano Diretor Norte", "(63) 3218-5110", -10.1749058, -48.3402127));
-        locais.add(new Local("Hospital e Maternidade Pública Dona Regina Siqueira Campos", "Q. 104 Norte Rua NE 5, Lote 21/41 - Centro, 77006-020", "(63) 3218-7700", -10.1816082, -48.3257026));
-        locais.add(new Local("Hospital Geral de Palmas Dr. Francisco Ayres - HGP", "201 Sul - Av. Ns1, Conjunto 02, Lote 02, s/n - Plano Diretor Sul, 77015-202", "(63) 3218-7801", -10.1962363, -48.3358432));
-        locais.add(new Local("Hospital Oswaldo Cruz", "OC ACSU SO 40 - Centro, 77000-000", "(63) 3219-9000", -10.208447, -48.3366885));
-        locais.add(new Local("Unidade de Saúde da Família 405 Norte", "APM 10, Q. 405 Norte Alameda 1 - Plano Diretor Norte", "(63) 3218-5403", -10.1624155, -48.346453));
-        locais.add(new Local("Usf - 407 Norte", "R 407 Norte - s/n Al 12 Lt, 06", "(63) 3218-5388", -10.1629025, -48.3489469));
-        locais.add(new Local("UBS - Unidade Básica de Saúde - 712 Sul", "Alameda 2, APM, s/n - 712 Sul", "(63) 3218-5331", -10.225481, -48.3158793));
     }
 
     @Override
@@ -97,10 +98,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        //percorrendo todos os locais do array e adicionando os marcadores ao mapa
-        for (Local local : locais) {
-            addMarker(local);
-        }
+        initLocais();
 
         //busca a posição do usuário e insere um marcador no mapa
         minhaPosicao();
@@ -148,7 +146,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 if(local != null) {
                     intent.putExtra("nome", local.nome);
                     intent.putExtra("endereco", local.endereco);
-                    intent.putExtra("telefone", local.telefone);
+                    intent.putExtra("imagem", local.imagem);
                     intent.putExtra("latitude", String.valueOf(local.latitude));
                     intent.putExtra("longitude", String.valueOf(local.longitude));
                 } else {
@@ -223,12 +221,47 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         markerOptions.position(point);
         markerOptions.title(local.nome);
         markerOptions.snippet(local.endereco);
-        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_person_pin));
+//        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_person_pin));
 
         userMarker = mMap.addMarker(markerOptions);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(point, 15));
         Log.i(TAG, "addUserMarker");
+    }
+
+    public void initLocais() {
+        RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
+        String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-10.2596918,-48.4746192&language=pt-BR&radius=50000&types=hospital|doctor&keyword=hospital&key=" + getString(R.string.google_maps_key);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    if(response.getString("status").equals("OK")) {
+                        JSONArray resultArray = response.getJSONArray("results");
+                        for (int i = 0; i < resultArray.length(); i++) {
+                            JSONObject item = resultArray.getJSONObject(i);
+                            JSONObject location = item.getJSONObject("geometry").getJSONObject("location");
+                            Local local = new Local(item.getString("name"), item.getString("vicinity"), item.getString("icon"), location.getDouble("lat"), location.getDouble("lng"));
+                            locais.add(local);
+                            addMarker(local);
+                        }
+                    } else {
+                        Log.e(TAG, "onResponse: erro na string de pesquisa");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "onErrorResponse: " + error.toString());
+            }
+        });
+
+        queue.add(request);
     }
 
     //chama a caixa de dialogo para confirmação de permissoes
