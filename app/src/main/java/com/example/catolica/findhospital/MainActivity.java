@@ -38,6 +38,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,6 +54,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private List<Local> locais = new ArrayList<>();
     private Marker userMarker;
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +75,24 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    Log.i(TAG, "onAuthStateChanged Signin Google Plus:signed_in" + user.getUid());
+                    Toast.makeText(MainActivity.this, "Seja bem-vindo " + user.getDisplayName(), Toast.LENGTH_LONG).show();
+                } else {
+                    Log.i(TAG, "onAuthStateChanged Signin Google Plus:signed_out");
+                    Toast.makeText(MainActivity.this, "Você precisa realizar o login para acessar o aplicativo", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                }
+            }
+        };
     }
 
     @Override
@@ -78,8 +100,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStart();
         try {
             //iniciando o service de notificação
-            Intent intentService = new Intent(getApplicationContext(), Servico.class);
-            startService(intentService);
+//            Intent intentService = new Intent(getApplicationContext(), Servico.class);
+//            startService(intentService);
+
+            mAuth.addAuthStateListener(mAuthListener);
         } catch (Exception e) {
             Log.e(TAG, "onStart: " + e.toString());
         }
@@ -172,6 +196,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onLocationChanged(Location location) {
         //muda a posição do marcador da posição do usuário toda vez que houver alteração de localização
+        Log.i(TAG, "onLocationChanged");
         userMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
     }
 

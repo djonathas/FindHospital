@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "538991968987",
+    "firebase_url": "https://ultimate-life-145912.firebaseio.com",
+    "project_id": "ultimate-life-145912",
+    "storage_bucket": "ultimate-life-145912.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538991968987:android:4b6cbb04e98824cf",
+        "android_client_info": {
+          "package_name": "com.example.catolica.djonathasapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "538991968987-0d8u7te2mfrrg0f07m5gjf0ffp1j487u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.catolica.djonathasapp",
+            "certificate_hash": "5B9A91A8837E96F159E2A34A60C1B8CE78FF8922"
+          }
+        },
+        {
+          "client_id": "538991968987-orddc58dgqfajo6ehcbac5uvvd2auebr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-1DXXCK1_M31tu3fC-1ZLADxUDX95t94"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "538991968987-orddc58dgqfajo6ehcbac5uvvd2auebr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538991968987:android:b4fa3e0efabbea71",
+        "android_client_info": {
+          "package_name": "com.example.catolica.findhospital"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "538991968987-tcu5ojqbhk2cec0kari43th4r5nirfr5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.catolica.findhospital",
+            "certificate_hash": "5B9A91A8837E96F159E2A34A60C1B8CE78FF8922"
+          }
+        },
+        {
+          "client_id": "538991968987-orddc58dgqfajo6ehcbac5uvvd2auebr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-1DXXCK1_M31tu3fC-1ZLADxUDX95t94"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "538991968987-orddc58dgqfajo6ehcbac5uvvd2auebr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
