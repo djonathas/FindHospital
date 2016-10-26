@@ -83,11 +83,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    Log.i(TAG, "onAuthStateChanged Signin Google Plus:signed_in" + user.getUid());
-                    Toast.makeText(MainActivity.this, "Seja bem-vindo " + user.getDisplayName(), Toast.LENGTH_LONG).show();
+                    Log.i(TAG, "onAuthStateChanged:signed_in:user:" + user.getUid());
                 } else {
-                    Log.i(TAG, "onAuthStateChanged Signin Google Plus:signed_out");
-                    Toast.makeText(MainActivity.this, "Você precisa realizar o login para acessar o aplicativo", Toast.LENGTH_LONG).show();
+                    Log.i(TAG, "onAuthStateChanged:signed_out");
                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                     startActivity(intent);
                 }
@@ -246,7 +244,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         markerOptions.position(point);
         markerOptions.title(local.nome);
         markerOptions.snippet(local.endereco);
-//        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_person_pin));
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_person_pin));
 
         userMarker = mMap.addMarker(markerOptions);
 

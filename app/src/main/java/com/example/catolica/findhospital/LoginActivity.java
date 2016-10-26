@@ -40,6 +40,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void init() {
+        Toast.makeText(LoginActivity.this, "Você precisa realizar o login para acessar o aplicativo", Toast.LENGTH_LONG).show();
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken("538991968987-orddc58dgqfajo6ehcbac5uvvd2auebr.apps.googleusercontent.com")
                 .requestEmail()
@@ -57,14 +59,12 @@ public class LoginActivity extends AppCompatActivity {
 
         SignInButton btnSignInButton = (SignInButton) findViewById(R.id.sing_in_button_google);
         Button btnSignInAnonymously = (Button) findViewById(R.id.btnSignInAnonymously);
-        Button btnCreateUser = (Button) findViewById(R.id.btnCreateUser);
-        Button btnSignInEmailPassword = (Button) findViewById(R.id.btnSignInEmailAndPassword);
+        Button btnSignInEmail = (Button) findViewById(R.id.btnSignInEmail);
 
         btnSignInButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                Toast.makeText(LoginActivity.this, "Logando...", Toast.LENGTH_SHORT).show();
                 signIn();
             }
         });
@@ -73,31 +73,34 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                Toast.makeText(LoginActivity.this, "Logando...", Toast.LENGTH_SHORT).show();
                 firebaseAuthAnonymous();
             }
         });
 
-        btnCreateUser.setOnClickListener(new View.OnClickListener() {
+        btnSignInEmail.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                Toast.makeText(LoginActivity.this, "Criando usuário...", Toast.LENGTH_SHORT).show();
-                firebaseCreateUser("djonathascc@hotmail.com", "12345678");
+                startActivity(new Intent(getApplicationContext(), LoginEmailActivity.class));
             }
         });
 
-        btnSignInEmailPassword.setOnClickListener(new View.OnClickListener() {
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            String email = extras.getString("email");
+            String senha = extras.getString("senha");
 
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(LoginActivity.this, "Logando...", Toast.LENGTH_SHORT).show();
-                firebaseAuthEmailAndPassword("djonathascc@hotmail.com", "12345678");
+            if (extras.getString("acao").equals("create")) {
+                firebaseCreateUserAndLogin(email, senha);
+            } else if (extras.getString("acao").equals("login")) {
+                firebaseAuthEmailAndPassword(email, senha);
             }
-        });
+        }
     }
 
     private void signIn() {
+        Toast.makeText(LoginActivity.this, "Logando com Google Plus...", Toast.LENGTH_SHORT).show();
+
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_GOOGLE_SING_IN);
     }
@@ -131,6 +134,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void firebaseAuthAnonymous() {
+        Toast.makeText(LoginActivity.this, "Logando como Anônimo", Toast.LENGTH_SHORT).show();
+
         mAuth.signInAnonymously().addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -146,22 +151,27 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void firebaseCreateUser(String email, String senha) {
+    private void firebaseCreateUserAndLogin(final String email, final String senha) {
+        Toast.makeText(LoginActivity.this, "Criando usuário...", Toast.LENGTH_SHORT).show();
+
         mAuth.createUserWithEmailAndPassword(email, senha).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 Log.i(TAG, "createUserWithEmailAndPassword:onComplete");
                 if (!task.isSuccessful()) {
                     Log.e(TAG, "createUserWithEmailAndPassword", task.getException());
-                    Toast.makeText(LoginActivity.this, "Falha na autenticação", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Falha na criação do usuário", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(LoginActivity.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
+                    firebaseAuthEmailAndPassword(email, senha);
                 }
             }
         });
     }
 
     private void firebaseAuthEmailAndPassword(String email, String senha) {
+        Toast.makeText(LoginActivity.this, "Logando com e-mail...", Toast.LENGTH_SHORT).show();
+
         mAuth.signInWithEmailAndPassword(email, senha).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
