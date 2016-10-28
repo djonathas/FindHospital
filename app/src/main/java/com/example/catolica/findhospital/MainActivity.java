@@ -97,10 +97,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onStart() {
         super.onStart();
         try {
-            //iniciando o service de notificação
-//            Intent intentService = new Intent(getApplicationContext(), Servico.class);
-//            startService(intentService);
-
             mAuth.addAuthStateListener(mAuthListener);
         } catch (Exception e) {
             Log.e(TAG, "onStart: " + e.toString());
@@ -120,6 +116,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        //inicia os locais no mapa
         initLocais();
 
         //busca a posição do usuário e insere um marcador no mapa
@@ -134,7 +131,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public View getInfoContents(Marker marker) {
-
+                //cria uma view personalizada na caixa de detalhes do marcador do mapa
                 Context context = getApplicationContext();
 
                 LinearLayout info = new LinearLayout(context);
@@ -156,39 +153,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 return info;
             }
         });
-
-        //setando um evento de clique ao clicar na popup do marcador
-        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-            @Override
-            public void onInfoWindowClick(Marker marker) {
-                Log.i(TAG, "setOnInfoWindowClickListener");
-                Local local = getLocal(marker.getTitle());
-
-                Intent intent = new Intent(getApplicationContext(), DetalhesActivity.class);
-                if(local != null) {
-                    intent.putExtra("nome", local.nome);
-                    intent.putExtra("endereco", local.endereco);
-                    intent.putExtra("imagem", local.imagem);
-                    intent.putExtra("latitude", String.valueOf(local.latitude));
-                    intent.putExtra("longitude", String.valueOf(local.longitude));
-                } else {
-                    intent.putExtra("nome", marker.getTitle());
-                    intent.putExtra("latitude", String.valueOf(marker.getPosition().latitude));
-                    intent.putExtra("longitude", String.valueOf(marker.getPosition().longitude));
-                }
-                startActivity(intent);
-            }
-        });
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
     }
 
     @Override
@@ -199,28 +163,48 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
+    public void onInfoWindowClick(Marker marker) {
+        //setando um evento de clique ao clicar na popup do marcador
+        Log.i(TAG, "setOnInfoWindowClickListener");
+        Local local = getLocal(marker.getTitle());
 
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
+        Intent intent = new Intent(getApplicationContext(), DetalhesActivity.class);
+        if (local != null) {
+            intent.putExtra("nome", local.nome);
+            intent.putExtra("endereco", local.endereco);
+            intent.putExtra("imagem", local.imagem);
+            intent.putExtra("latitude", String.valueOf(local.latitude));
+            intent.putExtra("longitude", String.valueOf(local.longitude));
+        } else {
+            intent.putExtra("nome", marker.getTitle());
+            intent.putExtra("latitude", String.valueOf(marker.getPosition().latitude));
+            intent.putExtra("longitude", String.valueOf(marker.getPosition().longitude));
+        }
+        startActivity(intent);
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 
     @Override
-    public void onInfoWindowClick(Marker marker) {
+    public void onConnected(@Nullable Bundle bundle) {
+    }
 
+    @Override
+    public void onConnectionSuspended(int i) {
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
     }
 
     //adiciona um marcador no mapa baseado nos dados do local
@@ -252,6 +236,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Log.i(TAG, "addUserMarker");
     }
 
+    //inicia os locais no mapa
     public void initLocais() {
         RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
         String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-10.2596918,-48.4746192&language=pt-BR&radius=50000&types=hospital|doctor&keyword=hospital&key=" + getString(R.string.google_maps_key);
@@ -260,7 +245,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    if(response.getString("status").equals("OK")) {
+                    if (response.getString("status").equals("OK")) {
                         JSONArray resultArray = response.getJSONArray("results");
                         for (int i = 0; i < resultArray.length(); i++) {
                             JSONObject item = resultArray.getJSONObject(i);
@@ -343,8 +328,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     //percorre o array em busca de um local especifico pelo nome
     private Local getLocal(String nome) {
-        for(Local local : locais) {
-            if(nome.equals(local.nome))
+        for (Local local : locais) {
+            if (nome.equals(local.nome))
                 return local;
         }
         return null;

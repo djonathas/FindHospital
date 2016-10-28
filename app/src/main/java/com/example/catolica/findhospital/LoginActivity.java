@@ -28,7 +28,6 @@ public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "login";
     private GoogleApiClient mGoogleApiClient;
     private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +38,8 @@ public class LoginActivity extends AppCompatActivity {
         init();
     }
 
+    //inicia a autenticação
     public void init() {
-        Toast.makeText(LoginActivity.this, "Você precisa realizar o login para acessar o aplicativo", Toast.LENGTH_LONG).show();
-
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken("538991968987-orddc58dgqfajo6ehcbac5uvvd2auebr.apps.googleusercontent.com")
                 .requestEmail()
@@ -91,13 +89,14 @@ public class LoginActivity extends AppCompatActivity {
             String senha = extras.getString("senha");
 
             if (extras.getString("acao").equals("create")) {
-                firebaseCreateUserAndLogin(email, senha);
+                firebaseCreateUser(email, senha);
             } else if (extras.getString("acao").equals("login")) {
                 firebaseAuthEmailAndPassword(email, senha);
             }
         }
     }
 
+    //logando com a conta do google
     private void signIn() {
         Toast.makeText(LoginActivity.this, "Logando com Google Plus...", Toast.LENGTH_SHORT).show();
 
@@ -107,6 +106,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //evento disparado apos a chamada da tela de login do google
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == RC_GOOGLE_SING_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
@@ -117,6 +117,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    //metodo chamado quando o usuario seleciona uma conta google para login
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -133,6 +134,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    //metodo para logar como anonimo
     private void firebaseAuthAnonymous() {
         Toast.makeText(LoginActivity.this, "Logando como Anônimo", Toast.LENGTH_SHORT).show();
 
@@ -151,7 +153,8 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void firebaseCreateUserAndLogin(final String email, final String senha) {
+    //metodo para criar um usuario com email e senha
+    private void firebaseCreateUser(final String email, final String senha) {
         Toast.makeText(LoginActivity.this, "Criando usuário...", Toast.LENGTH_SHORT).show();
 
         mAuth.createUserWithEmailAndPassword(email, senha).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -163,12 +166,12 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, "Falha na criação do usuário", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(LoginActivity.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
-                    firebaseAuthEmailAndPassword(email, senha);
                 }
             }
         });
     }
 
+    //metodo para logar usando email e senha anteriormente cadastrados
     private void firebaseAuthEmailAndPassword(String email, String senha) {
         Toast.makeText(LoginActivity.this, "Logando com e-mail...", Toast.LENGTH_SHORT).show();
 
